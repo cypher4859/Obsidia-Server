@@ -5,8 +5,8 @@ const identityService = require('../service/IdentityService').object
 exports.schemaTypes = `
 ${IIdentity.getIIdentityType()}
 ${identityService.getQueries()}
-${identityService.getMutations()}
 ${identityService.getInputs()}
+${identityService.getMutations()}
 `
 
 // Source of truth for the function definitions of API endpoints
@@ -19,15 +19,16 @@ exports.root = {
         return identityService.getIdentities(user)
     },
 
-    createIdentity: ({identityModel}) => {
-        return identityService.createIdentity(identityModel)
+    createNewIdentityCasefile: ({newIdentityModel}) => {
+        // console.log(newIdentityModel)
+        return identityService.createIdentity(newIdentityModel)
     },
 
-    updateIdentity: ({id, identityModel}) => {
+    updateIdentityCasefile: ({id, identityModel}) => {
         return identityService.updateIdentity(id, identityModel)
     },
 
-    deleteIdentity: ({id}) => {
+    deleteIdentityCasefile: ({id}) => {
         return identityService.deleteIdentity(id)
     }
 }
