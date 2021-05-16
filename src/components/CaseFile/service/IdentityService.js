@@ -1,14 +1,15 @@
 const graphql = require("graphql");
 const iidentity = require("../types/impl/IIdentity").iidentity
-const testData = require("../utility/exampleData").testData
+var testData = require("../utility/exampleData").testData
 const _ = require("lodash")
+const { v4: uuidv4 } = require('uuid')
 
 // API GraphQL function definitions go here
 class IdentityService {
   constructor () {}
   
   getIdentity (searchTerm) {
-    return this.getDataFromDatabase(searchTerm)
+    return this.getDataFromDatabase(searchTerm)[0]
   }
 
   getIdentities (user = "cypher") {
@@ -29,16 +30,17 @@ class IdentityService {
   getMutations () {
     return `
       type Mutation {
-        createNewIdentityCasefile(input: IdentityInput): IIdentity
-        updateIdentityCasefile(id: ID!, input: IdentityInput): IIdentity
-        deleteIdentityCasefile(id: ID!)
+        createNewIdentityCasefile(newIdentityModel: IdentityInput): IIdentity
+        updateIdentityCasefile(id: ID!, identityModel: IdentityInput): IIdentity
+        deleteIdentityCasefile(id: ID!): IIdentity
       }
     `
   }
 
   getInputs () {
-    return `
-      input IdentityInput {
+    return `input IdentityInput {
+        id: String
+        _user: String
         fullname: String
         first: String
         middle: String
@@ -70,25 +72,76 @@ class IdentityService {
 
   getAllIdentitiesFromDatabase () {
     return Object.values(testData).filter((data) => {
-      return data.id
+      return data.id && !data._deleted
     })
   }
 
   getDataFromDatabase (arg) {
-    let result = {}
-    Object.values(testData).forEach((data) => {
-      if (Object.values(data).includes(arg)) {
-        result = data
-      }
+    return Object.values(testData).filter((data) => {
+      return Object.values(data).includes(arg) && !data._deleted
     })
-    return result
   }
 
-  createIdentity (identityModel) {}
+  insertModelIntoDatabase (identityModel) {
+    const id = uuidv4()
+    identityModel.id = id
+    testData[identityModel.id] = identityModel
+    return testData[identityModel.id]
+  }
 
-  updateIdentity (id, identityModel) {}
+  createIdentity (identityModel) {
+    return this.insertModelIntoDatabase(identityModel)
+  }
 
-  deleteIdentity (id) {}
+  updateIdentity (id, newModel) {
+    const oldModel = this.getIdentity(id)
+    Object.keys(newModel).forEach((key) => {
+      oldModel[key] = newModel[key]
+    })
+    return oldModel
+  }
+
+  deleteIdentity (id) {
+    const identityToDelete = this.getIdentity(id)
+    if (!identityToDelete._deleted) {
+      identityToDelete._deleted = true
+      this.updateIdentity(identityToDelete.id, identityToDelete)
+    }
+    return identityToDelete
+  }
+
+  getDefaultItem () {
+    return {
+      _deleted: false,
+      _user: '',
+      id: uuidv4(),
+      fullname: '',
+      first: '',
+      middle: '',
+      last: '',
+      suffix: '',
+      additional: '',
+      month: '',
+      day: '',
+      year: '',
+      date: '',
+      age: '',
+      socialSecurityNumber: '',
+      driversLicenseNumber: '',
+      passportIdentifier: '',
+      phones: [],
+      emails: [],
+      messagingApplications: [],
+      height: '',
+      weight: '',
+      eyeColor: '',
+      hairColor: '',
+      tattoos: [],
+      piercings: [],
+      physicalDeformities: [],
+      profile: ''
+    }
+  }
 }
 
 identityService = new IdentityService
