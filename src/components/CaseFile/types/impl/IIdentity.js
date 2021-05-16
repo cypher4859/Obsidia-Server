@@ -4,6 +4,7 @@ var graphql = require('graphql');
 class IIdentity {
   getIIdentityType () {
     return `type IIdentity {
+      _deleted: Boolean
       _user: String
       id: String!
       fullname: String
