@@ -2,7 +2,7 @@ var express = require('express');
 var { graphqlHTTP } = require('express-graphql');
 var graphql = require('graphql');
 
-const IdentityService = require('./src/components/CaseFile/service/IdentityService')
+const mongodbService = require('./src/services/impl/MongodbService').object
 const root = require('./src/components/CaseFile/GQLTypes/schemaTypes').root
 const types = require('./src/components/CaseFile/GQLTypes/schemaTypes').schemaTypes
 
@@ -21,6 +21,7 @@ app.use('/graphql', graphqlHTTP({
 app.get('/', function (req, res) {
   res.status(200)
   console.log('Status is: ', res.statusCode)
+  mongodbService.pingCheckDiagnostic()
 })
 
 app.listen(PORT);
