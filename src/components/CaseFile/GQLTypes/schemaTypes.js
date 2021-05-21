@@ -19,6 +19,10 @@ exports.root = {
         return identityService.getIdentities(user)
     },
 
+    getDeletedIdentities: ({user = "cypher" }) => {
+        return identityService.getDeletedIdentities(user)
+    },
+
     createNewIdentityCasefile: ({newIdentityModel}) => {
         // console.log(newIdentityModel)
         return identityService.createIdentity(newIdentityModel)
