@@ -18,11 +18,18 @@ class IdentityService {
     })
   }
 
+  getDeletedIdentities (user = "cypher") {
+    return Object.values(this.getDeletedIdentitiesFromDatabase()).filter((identity) => {
+      return identity._user == user
+    })
+  }
+
   getQueries () {
     return `
       type Query {
         getIdentity(searchTerm: String): IIdentity
         getIdentities(user: String = cypher): [IIdentity]!
+        getDeletedIdentities(user: String = cypher): [IIdentity]
       }
     `
   }
@@ -76,6 +83,12 @@ class IdentityService {
     })
   }
 
+  getDeletedIdentitiesFromDatabase () {
+    return Object.values(testData).filter((data) => {
+      return data.id && data._deleted
+    })
+  }
+
   getDataFromDatabase (arg) {
     return Object.values(testData).filter((data) => {
       return Object.values(data).includes(arg) && !data._deleted
@@ -103,11 +116,12 @@ class IdentityService {
 
   deleteIdentity (id) {
     const identityToDelete = this.getIdentity(id)
+    const displayIdentityToDelete = Object.assign({}, identityToDelete)
     if (!identityToDelete._deleted) {
       identityToDelete._deleted = true
       this.updateIdentity(identityToDelete.id, identityToDelete)
     }
-    return identityToDelete
+    return displayIdentityToDelete
   }
 
   getDefaultItem () {
