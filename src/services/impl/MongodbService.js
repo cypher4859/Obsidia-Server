@@ -30,13 +30,27 @@ class MongodbService {
   async createNewUser (user) {
     // Create new user.
   }
+  async listDatabases (user) {
     try {
-      console.log('client: ', this.client)
       await this.client.connect()
-      const databaseList = await this.client.db().admin().listDatabases()
-      databaseList.forEach((database) => {
-        console.log(database)
-      });
+      const databaseList = (await this.client
+        .db()
+        .admin()
+        .listDatabases()).databases
+      return databaseList
+    } catch (e) {
+      console.error(e)
+    }
+  }
+
+  async listCollections (user, db) {
+    // List all the collections for a user
+    try {
+      await this.client.connect()
+      const collectionList = await this.client
+        .db(db)
+        .listCollections({}, { nameOnly: true })
+      return collectionList
     } catch (e) {
       console.error(e)
     }
