@@ -27,7 +27,9 @@ class MongodbService {
     }
   }
 
-  async listDatabases () {
+  async createNewUser (user) {
+    // Create new user.
+  }
     try {
       console.log('client: ', this.client)
       await this.client.connect()
@@ -40,7 +42,17 @@ class MongodbService {
     }
   }
 
+  async checkForCollection (user, collection, db) {
+    // confirm that user's collection exists
+  }
+
+  async getCollectionForUser (user, collectionName, db) {
+    // get collection for user
+  }
+
   dropDatabase () {}
+
+  async dropCollection () {}
 }
 
 mongoService = new MongodbService
