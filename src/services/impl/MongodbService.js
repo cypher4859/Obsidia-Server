@@ -55,6 +55,19 @@ class MongodbService {
     this.client.close()
   }
 
+  // TODO: This needs to be generic - no Identity
+  async insertNewDocumentGroupForUser (user, collectionName, databaseName, documents) {
+    try {
+      await this.client.connect()
+      const db = this.client.db(databaseName)
+      // console.log(identities)
+      await db.collection(collectionName).insertMany(documents)
+    } catch {
+      throw 'Could not insert documents into the database!'
+    }
+    this.client.close()
+  }
+
   async listDatabases (user) {
     try {
       await this.client.connect()
