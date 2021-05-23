@@ -240,6 +240,33 @@ app.get('/get-identity', async function (req, res) {
   }
   res.end()
 })
+
+app.post('/get-identities', async function (req, res) {
+  let user
+  let query
+  if (req.body.user) {
+    user = req.body.user
+  } else {
+    res.status(500).send('Could not find a User in the request')
+    res.end()
+    return
+  }
+
+  if (req.body.query) {
+    query = req.body.query
+  } else {
+    res.status(500).send('Could not find a Query in the request')
+    res.end()
+    return
+  }
+
+  try {
+    const results = await identityService.getIdentities(query)
+    res.status(200).send(results)
+  } catch {
+    res.status(500).send('Could not find any Identities')
+  }
+  res.end()
 })
 
 app.listen(PORT);
