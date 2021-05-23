@@ -29,7 +29,6 @@ app.get('/', async function (req, res) {
 })
 
 app.post('/create-new-collection', async function (req, res) {
-  console.log(req.body)
   let collection = ''
   let user = ''
   let database = ''
