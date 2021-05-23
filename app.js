@@ -66,6 +66,54 @@ app.post('/create-new-collection', async function (req, res) {
   res.end()
 })
 
+app.post('/insert-new-identity', async function (req, res) {
+  console.log(req.body)
+  let collection
+  let user
+  let database
+  let document
+
+  if (req.body.collection) {
+    collection = req.body.collection    
+  } else {
+    res.status(500).send('Could not find Collection in the request')
+    res.end()
+    return
+  }
+
+  if (req.body.user) {
+    user = req.body.user
+  } else {
+    res.status(500).send('Could not find User in the request')
+    res.end()
+    return
+  }
+
+  if (req.body.database) {
+    database = req.body.database
+  } else {
+    res.status(500).send('Could not find Database in the request')
+    res.end()
+    return
+  }
+
+  if (req.body.document) {
+    document = req.body.document
+  } else {
+    res.status(500).send('Could not find a Document in the request')
+    res.end()
+    return
+  }
+
+  try {
+    await mongodbService.insertNewIdentityForUser(user, collection, database, document)
+    res.status(200).send('Created the new Identity')
+  } catch {
+    res.status(500).send('ERROR something went wrong')
+  }
+  res.end()
+})
+
 })
 
 app.listen(PORT);
