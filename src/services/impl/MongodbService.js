@@ -30,6 +30,7 @@ class MongodbService {
   async createNewUser (user) {
     // Create new user.
   }
+
   async createNewCollectionForUser (user, collectionName, databaseName) {
     // Create the new collection
     try {
@@ -41,6 +42,19 @@ class MongodbService {
     }
     this.client.close()
   }
+
+  // TODO: This needs to be generic - no Identity
+  async insertNewDocumentForUser (user, collectionName, databaseName, document) {
+    try {
+      await this.client.connect()
+      const db = this.client.db(databaseName)
+      await db.collection(collectionName).insertOne(document)
+    } catch {
+      throw 'Could not insert document'
+    }
+    this.client.close()
+  }
+
   async listDatabases (user) {
     try {
       await this.client.connect()
