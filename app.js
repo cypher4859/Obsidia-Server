@@ -21,10 +21,12 @@ app.use('/graphql', graphqlHTTP({
   graphiql: true
 }));
 
-app.get('/', function (req, res) {
+app.get('/', async function (req, res) {
   res.status(200)
   console.log('Status is: ', res.statusCode)
-  mongodbService.pingCheckDiagnostic()
+  await mongodbService.pingCheckDiagnostic()
+  res.end()
+})
 })
 
 app.listen(PORT);
