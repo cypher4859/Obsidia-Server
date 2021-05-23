@@ -8,8 +8,15 @@ const { v4: uuidv4 } = require('uuid')
 class IdentityService {
   constructor () {}
   
-  getIdentity (searchTerm) {
-    return this.getDataFromDatabase(searchTerm)[0]
+  async getIdentity (user, obsId) {
+    // return this.getDataFromDatabase(id)[0]
+    return await mongodbService.getDocument(this.identitiesCollection, this.databaseName,
+      {
+        id: obsId, 
+        _user: user,
+        _deleted: false
+      }
+    )
   }
 
   async getIdentities (query, user = "cypher") {
