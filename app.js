@@ -161,6 +161,55 @@ app.post('/insert-new-identity-group', async function (req, res) {
   res.end()
 })
 
+app.get('/list-databases', async function (req,res) {
+  // list databases
+  let user
+  try {
+    user = req.query.user
+  } catch {
+    res.status(500).send('Could not find user in request')
+  }
+
+  try {
+    const databases = await mongodbService.listDatabases(user)
+    res.status(200).send({ databases: databases })
+  } catch {
+    res.status(500).send('ERROR! Could not list databases')
+  }
+  res.end()
+})
+
+/// TODO: List out the collections correctly, this is weird (?)
+app.get('/list-collections', async function (req, res) {
+  // list collections
+  let user
+  let db
+  // console.log('Whats in the query: ', req.query)
+  if (req.query.user) {
+    user = req.query.user
+  } else {
+    res.status(500).send('Could not find a User in the request')
+    res.end()
+    return
+  }
+
+  if (req.query.db) {
+    db = req.query.db
+  } else {
+    res.status(500).send('Could not find a Database Name in the request')
+    res.end()
+    return
+  }
+
+  try {
+    const collections = await mongodbService.listCollections(user, db)
+    console.log('Collections at the top of the heirarchy: ', collections)
+    res.status(200).send({ collections: collections })
+  } catch {
+    res.status(500).send('ERROR! Could not list collections')
+  }
+  res.end()
+})
 })
 
 app.listen(PORT);
