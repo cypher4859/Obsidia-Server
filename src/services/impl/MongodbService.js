@@ -50,7 +50,17 @@ class MongodbService {
     // get collection for user
   }
 
-  dropDatabase () {}
+  async getMultipleDocuments (collectionName, db, query) {
+    console.log('Grabbing the documents')
+    try {
+      await this.client.connect()
+      const results = await this.client.db(db).collection(collectionName).find(query).toArray()
+      return results
+    } catch {
+      throw 'Error attempting to find documents!'
+    }
+    this.client.close()
+  }
 
   async dropCollection () {}
 }
