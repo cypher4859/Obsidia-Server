@@ -27,6 +27,46 @@ app.get('/', async function (req, res) {
   await mongodbService.pingCheckDiagnostic()
   res.end()
 })
+
+app.post('/create-new-collection', async function (req, res) {
+  console.log(req.body)
+  let collection = ''
+  let user = ''
+  let database = ''
+
+  if (req.body.collection) {
+    collection = req.body.collection    
+  } else {
+    res.status(500).send('Could not find Collection in the request')
+    res.end()
+    return
+  }
+
+  if (req.body.user) {
+    user = req.body.user
+  } else {
+    res.status(500).send('Could not find User in the request')
+    res.end()
+    return
+  }
+
+  if (req.body.database) {
+    database = req.body.database
+  } else {
+    res.status(500).send('Could not find Database in the request')
+    res.end()
+    return
+  }
+
+  try {
+    await mongodbService.createNewCollectionForUser(user, collection, database)
+    res.status(200).send('Created the new collection')
+  } catch {
+    res.status(500).send('ERROR something went wrong')
+  }
+  res.end()
+})
+
 })
 
 app.listen(PORT);
