@@ -114,6 +114,53 @@ app.post('/insert-new-identity', async function (req, res) {
   res.end()
 })
 
+app.post('/insert-new-identity-group', async function (req, res) {
+  let database
+  let collection
+  let documents
+  let user
+
+  if (req.body.documents) {
+    documents = req.body.documents
+  } else {
+    res.status(500).send('Could not find an array of Documents in the request')
+    res.end()
+    return
+  }
+
+  if (req.body.database) {
+    database = req.body.database
+  } else {
+    res.status(500).send('Could not find a Database name in the request')
+    res.end()
+    return
+  }
+
+  if (req.body.collection) {
+    collection = req.body.collection
+  } else {
+    res.status(500).send('Could not find a Collection in the request')
+    res.end()
+    return
+  }
+
+  if (req.body.user) {
+    user = req.body.user
+  } else {
+    res.status(500).send('Could not find a User in the request')
+    res.end()
+    return
+  }
+
+  try {
+    await mongodbService.insertNewIdentityGroupForUser(user, collection, database, documents)
+    res.status(200).send('Created the new group of identities')
+  } catch {
+    res.status(500).send('ERROR something went wrong')
+  }
+  res.end()
+})
+
 })
 
 app.listen(PORT);
