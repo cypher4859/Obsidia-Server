@@ -30,6 +30,17 @@ class MongodbService {
   async createNewUser (user) {
     // Create new user.
   }
+  async createNewCollectionForUser (user, collectionName, databaseName) {
+    // Create the new collection
+    try {
+      await this.client.connect()
+      const db = this.client.db(databaseName)
+      await db.createCollection(collectionName)
+    } catch {
+      throw 'Could not create collection'
+    }
+    this.client.close()
+  }
   async listDatabases (user) {
     try {
       await this.client.connect()
