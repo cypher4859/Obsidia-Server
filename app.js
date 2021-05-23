@@ -210,6 +210,36 @@ app.get('/list-collections', async function (req, res) {
   }
   res.end()
 })
+
+app.get('/get-identity', async function (req, res) {
+  // get identity
+  // list databases
+  let user
+  let id
+  if (req.query.user) {
+    user = req.query.user
+  } else {
+    res.status(500).send('Could not find a User in the request')
+    res.end()
+    return
+  }
+
+  if (req.query.id) {
+    id = req.query.id
+  } else {
+    res.status(500).send('Could not find an Identity ID in the request')
+    res.end()
+    return
+  }
+
+  try {
+    const results = await identityService.getIdentity(user, id)
+    res.status(200).send(results)
+  } catch {
+    res.status(500).send('ERROR! Could not list databases')
+  }
+  res.end()
+})
 })
 
 app.listen(PORT);
