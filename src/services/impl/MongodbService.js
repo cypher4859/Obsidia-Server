@@ -50,6 +50,18 @@ class MongodbService {
     // get collection for user
   }
 
+  async getDocument (collectionName, db, query) {
+    try {
+      await this.client.connect()
+      const results = await this.client.db(db).collection(collectionName).findOne(query)
+      console.log(results)
+      return results
+    } catch {
+      throw 'Could not find documents meeting criteria in the database!'
+    }
+    this.client.close()
+  }
+
   async getMultipleDocuments (collectionName, db, query) {
     console.log('Grabbing the documents')
     try {
