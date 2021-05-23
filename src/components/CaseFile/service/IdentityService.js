@@ -12,10 +12,12 @@ class IdentityService {
     return this.getDataFromDatabase(searchTerm)[0]
   }
 
-  getIdentities (user = "cypher") {
-    return Object.values(this.getAllIdentitiesFromDatabase()).filter((identity) => {
-      return identity._user == user
-    })
+  async getIdentities (query, user = "cypher") {
+    // return Object.values(this.getAllIdentitiesFromDatabase()).filter((identity) => {
+    //   return identity._user == user
+    // })
+    const fixedQuery = Object.assign(query, { _deleted: false })
+    return await mongodbService.getMultipleDocuments(this.identitiesCollection, this.databaseName, fixedQuery)
   }
 
   getDeletedIdentities (user = "cypher") {
