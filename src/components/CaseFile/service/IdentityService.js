@@ -3,10 +3,13 @@ const iidentity = require("../types/impl/IIdentity").iidentity
 var testData = require("../utility/exampleData").testData
 const _ = require("lodash")
 const { v4: uuidv4 } = require('uuid')
-
+const mongodbService = require('../../../services/impl/MongodbService').object
 // API GraphQL function definitions go here
 class IdentityService {
   constructor () {}
+
+  identitiesCollection = 'identities'
+  databaseName = 'case-file'
   
   async getIdentity (user, obsId) {
     // return this.getDataFromDatabase(id)[0]
