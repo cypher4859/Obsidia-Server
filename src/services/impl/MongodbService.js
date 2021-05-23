@@ -18,7 +18,9 @@ class MongodbService {
   async pingCheckDiagnostic () {
     try {
       await this.client.connect()
-      await this.client.db("admin").command({ ping: 1 })
+      await this.client
+        .db("admin")
+        .command({ ping: 1 })
       console.log('Connected Successfully!')
     } finally {
       await this.client.close()
