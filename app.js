@@ -243,7 +243,8 @@ app.get('/get-identity', async function (req, res) {
 
 app.post('/get-identities', async function (req, res) {
   let user
-  let query
+  let query = {}
+  let deleted = false
   if (req.body.user) {
     user = req.body.user
   } else {
@@ -252,8 +253,22 @@ app.post('/get-identities', async function (req, res) {
     return
   }
 
+  if (req.body._deleted !== null) {
+    deleted = req.body._deleted
+  }
+
   if (req.body.query) {
     query = req.body.query
+  }
+
+  try {
+    const results = await identityService.getIdentities(query, deleted)
+    res.status(200).send(results)
+  } catch {
+    res.status(500).send('Could not find any Identities')
+  }
+  res.end()
+})
   } else {
     res.status(500).send('Could not find a Query in the request')
     res.end()
