@@ -127,12 +127,23 @@ class MongodbService {
   }
 
   async updateDocumentWithNewModel (collectionName, db, user, filter, updateDocument) {
-    console.log('Updating...')
     try {
       await this.client.connect()
       return await this.client.db(db).collection(collectionName).updateOne(filter, updateDocument, {})
     } catch {
       throw 'Error updating document'
+    }
+    this.client.close()
+  }
+
+  async updateMultipleDocumentsWithNewModel (collectionName, db, user, filter, updateDocument) {
+    try {
+      await this.client.connect()
+      const result = await this.client.db(db).collection(collectionName).updateMany(filter, updateDocument, {})
+      this.client.close()
+      return result
+    } catch {
+      throw 'Error updating multiple documents'
     }
     this.client.close()
   }
