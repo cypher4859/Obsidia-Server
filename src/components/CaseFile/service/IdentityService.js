@@ -22,18 +22,10 @@ class IdentityService {
     )
   }
 
-  async getIdentities (query, user = "cypher") {
-    // return Object.values(this.getAllIdentitiesFromDatabase()).filter((identity) => {
-    //   return identity._user == user
-    // })
-    const fixedQuery = Object.assign(query, { _deleted: false })
+  async getIdentities (query, deleted = false, user = "cypher") {
+    const fixedQuery = Object.assign(query, { _deleted: deleted, _user: user })
+    console.log(query)
     return await mongodbService.getMultipleDocuments(this.identitiesCollection, this.databaseName, fixedQuery)
-  }
-
-  getDeletedIdentities (user = "cypher") {
-    return Object.values(this.getDeletedIdentitiesFromDatabase()).filter((identity) => {
-      return identity._user == user
-    })
   }
 
   getQueries () {
@@ -41,7 +33,6 @@ class IdentityService {
       type Query {
         getIdentity(searchTerm: String): IIdentity
         getIdentities(user: String = cypher): [IIdentity]!
-        getDeletedIdentities(user: String = cypher): [IIdentity]
       }
     `
   }
