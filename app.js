@@ -308,5 +308,43 @@ app.post('/update-identity', async function (req, res) {
   res.end()
 })
 
+app.post('/update-multiple-identities', async function (req, res) {
+  let documentToUpdateWith
+  let user
+  let filter
+
+  if (req.body.documentToUpdateWith) {
+    documentToUpdateWith = req.body.documentToUpdateWith
+  } else {
+    res.status(500).send('Could not find a Document in the request')
+    res.end()
+    return
+  }
+
+  if (req.body.filter) {
+    filter = req.body.filter
+  } else {
+    res.status(500).send('Could not find a Document in the request')
+    res.end()
+    return
+  }
+
+  if (req.body.user) {
+    user = req.body.user
+  } else {
+    res.status(500).send('Could not find a User in the request')
+    res.end()
+    return
+  }
+
+  try {
+    await identityService.updateMultipleIdentities(user, filter, documentToUpdateWith)
+    res.status(200).send('Updated document')
+  } catch {
+    res.status(500).send('ERROR something went wrong')
+  }
+  res.end()
+})
+
 app.listen(PORT);
 console.log("HTTP server listening on port %s", PORT);
