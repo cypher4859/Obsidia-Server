@@ -269,17 +269,41 @@ app.post('/get-identities', async function (req, res) {
   }
   res.end()
 })
+
+app.post('/update-identity', async function (req, res) {
+  let documentId
+  let documentToUpdateWith
+  let user
+
+  if (req.body.documentId) {
+    documentId = req.body.documentId
   } else {
-    res.status(500).send('Could not find a Query in the request')
+    res.status(500).send('Could not find a Document in the request')
+    res.end()
+    return
+  }
+
+  if (req.body.documentToUpdateWith) {
+    documentToUpdateWith = req.body.documentToUpdateWith
+  } else {
+    res.status(500).send('Could not find a Document in the request')
+    res.end()
+    return
+  }
+
+  if (req.body.user) {
+    user = req.body.user
+  } else {
+    res.status(500).send('Could not find a User in the request')
     res.end()
     return
   }
 
   try {
-    const results = await identityService.getIdentities(query)
-    res.status(200).send(results)
+    await identityService.updateIdentityWithDocument(user, documentId, documentToUpdateWith)
+    res.status(200).send('Updated document')
   } catch {
-    res.status(500).send('Could not find any Identities')
+    res.status(500).send('ERROR something went wrong')
   }
   res.end()
 })
