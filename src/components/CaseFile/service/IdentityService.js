@@ -108,12 +108,14 @@ class IdentityService {
     return this.insertModelIntoDatabase(identityModel)
   }
 
-  updateIdentity (id, newModel) {
-    const oldModel = this.getIdentity(id)
-    Object.keys(newModel).forEach((key) => {
-      oldModel[key] = newModel[key]
-    })
-    return oldModel
+  async updateIdentityWithDocument (user, id, document) {
+    const filter = { id: id }
+    const updateDocument = {
+      $set: document
+    }
+    return await mongodbService.updateDocumentWithNewModel(this.identitiesCollection, this.databaseName, user, filter, updateDocument)
+  }
+
   }
 
   deleteIdentity (id) {
