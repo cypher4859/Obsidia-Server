@@ -116,16 +116,28 @@ class IdentityService {
     return await mongodbService.updateDocumentWithNewModel(this.identitiesCollection, this.databaseName, user, filter, updateDocument)
   }
 
+  // TODO: Should be able to change some things multiple identities
+  async updateMultipleIdentities (user, filter, document) {
+    const updateDocument = {
+      $set: document
+    }
+    return await mongodbService.updateMultipleDocumentsWithNewModel(this.identitiesCollection, this.databaseName, user, filter, updateDocument)
   }
 
-  deleteIdentity (id) {
-    const identityToDelete = this.getIdentity(id)
-    const displayIdentityToDelete = Object.assign({}, identityToDelete)
-    if (!identityToDelete._deleted) {
-      identityToDelete._deleted = true
-      this.updateIdentity(identityToDelete.id, identityToDelete)
+  // TODO: Should be able to change some things multiple identities
+  async deleteMultipleIdentities (user, idList) {
+    const update = {
+      _deleted: true
     }
-    return displayIdentityToDelete
+    return await mongodbService.updateMultipleDocumentsWithNewModel(user, filter, updateDocument)
+  }
+
+  // TODO: Should be able to change some things multiple identities
+  async deleteIdentity (user, id) {
+    const document = {
+      _deleted: true
+    }
+    return await this.updateIdentityWithDocument(user, id, document)
   }
 
   getDefaultItem () {
