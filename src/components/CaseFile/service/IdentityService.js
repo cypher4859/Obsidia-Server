@@ -24,7 +24,6 @@ class IdentityService {
 
   async getIdentities (query, deleted = false, user = "cypher") {
     const fixedQuery = Object.assign(query, { _deleted: deleted, _user: user })
-    console.log(query)
     return await mongodbService.getMultipleDocuments(this.identitiesCollection, this.databaseName, fixedQuery)
   }
 
