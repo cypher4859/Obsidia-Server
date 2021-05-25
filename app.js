@@ -21,6 +21,17 @@ app.use('/graphql', graphqlHTTP({
   graphiql: true
 }));
 
+function getRequestVariable (requestProperty, req, res, method = 'POST') {
+  const requestVariable = method === 'POST' ? 'body' : 'query'
+  if (req[requestVariable][requestProperty]) {
+    return req[requestVariable][requestProperty]    
+  } else {
+    res.status(500).send(`Could not find ${requestProperty} in the request`)
+    res.end()
+    return null
+  }
+}
+
 app.get('/', async function (req, res) {
   res.status(200)
   console.log('Status is: ', res.statusCode)
@@ -29,33 +40,9 @@ app.get('/', async function (req, res) {
 })
 
 app.post('/create-new-collection', async function (req, res) {
-  let collection = ''
-  let user = ''
-  let database = ''
-
-  if (req.body.collection) {
-    collection = req.body.collection    
-  } else {
-    res.status(500).send('Could not find Collection in the request')
-    res.end()
-    return
-  }
-
-  if (req.body.user) {
-    user = req.body.user
-  } else {
-    res.status(500).send('Could not find User in the request')
-    res.end()
-    return
-  }
-
-  if (req.body.database) {
-    database = req.body.database
-  } else {
-    res.status(500).send('Could not find Database in the request')
-    res.end()
-    return
-  }
+  let collection = getRequestVariable('collection', req, res)
+  let user = getRequestVariable('user', req, res)
+  let database = getRequestVariable('database', req, res)
 
   try {
     await mongodbService.createNewCollectionForUser(user, collection, database)
@@ -67,46 +54,13 @@ app.post('/create-new-collection', async function (req, res) {
 })
 
 app.post('/insert-new-identity', async function (req, res) {
-  console.log(req.body)
-  let collection
-  let user
-  let database
-  let document
-
-  if (req.body.collection) {
-    collection = req.body.collection    
-  } else {
-    res.status(500).send('Could not find Collection in the request')
-    res.end()
-    return
-  }
-
-  if (req.body.user) {
-    user = req.body.user
-  } else {
-    res.status(500).send('Could not find User in the request')
-    res.end()
-    return
-  }
-
-  if (req.body.database) {
-    database = req.body.database
-  } else {
-    res.status(500).send('Could not find Database in the request')
-    res.end()
-    return
-  }
-
-  if (req.body.document) {
-    document = req.body.document
-  } else {
-    res.status(500).send('Could not find a Document in the request')
-    res.end()
-    return
-  }
+  let collection = getRequestVariable('collection', req, res)
+  let user = getRequestVariable('user', req, res)
+  let database = getRequestVariable('database', req, res)
+  let document = getRequestVariable('document', req, res)
 
   try {
-    await mongodbService.insertNewIdentityForUser(user, collection, database, document)
+    await identityService.createIdentity(document)
     res.status(200).send('Created the new Identity')
   } catch {
     res.status(500).send('ERROR something went wrong')
@@ -115,45 +69,13 @@ app.post('/insert-new-identity', async function (req, res) {
 })
 
 app.post('/insert-new-identity-group', async function (req, res) {
-  let database
-  let collection
-  let documents
-  let user
-
-  if (req.body.documents) {
-    documents = req.body.documents
-  } else {
-    res.status(500).send('Could not find an array of Documents in the request')
-    res.end()
-    return
-  }
-
-  if (req.body.database) {
-    database = req.body.database
-  } else {
-    res.status(500).send('Could not find a Database name in the request')
-    res.end()
-    return
-  }
-
-  if (req.body.collection) {
-    collection = req.body.collection
-  } else {
-    res.status(500).send('Could not find a Collection in the request')
-    res.end()
-    return
-  }
-
-  if (req.body.user) {
-    user = req.body.user
-  } else {
-    res.status(500).send('Could not find a User in the request')
-    res.end()
-    return
-  }
+  let database = getRequestVariable('database', req, res)
+  let collection = getRequestVariable('collection', req, res)
+  let documents = getRequestVariable('documents', req, res)
+  let user = getRequestVariable('user', req, res)
 
   try {
-    await mongodbService.insertNewIdentityGroupForUser(user, collection, database, documents)
+    await mongodbService.insertNewDocumentGroupForUser(user, collection, database, documents)
     res.status(200).send('Created the new group of identities')
   } catch {
     res.status(500).send('ERROR something went wrong')
@@ -163,12 +85,7 @@ app.post('/insert-new-identity-group', async function (req, res) {
 
 app.get('/list-databases', async function (req,res) {
   // list databases
-  let user
-  try {
-    user = req.query.user
-  } catch {
-    res.status(500).send('Could not find user in request')
-  }
+  let user = getRequestVariable('user', req, res, 'GET')
 
   try {
     const databases = await mongodbService.listDatabases(user)
@@ -182,24 +99,9 @@ app.get('/list-databases', async function (req,res) {
 /// TODO: List out the collections correctly, this is weird (?)
 app.get('/list-collections', async function (req, res) {
   // list collections
-  let user
-  let db
+  let user = getRequestVariable('user', req, res, 'GET')
+  let db = getRequestVariable('db', req, res, 'GET')
   // console.log('Whats in the query: ', req.query)
-  if (req.query.user) {
-    user = req.query.user
-  } else {
-    res.status(500).send('Could not find a User in the request')
-    res.end()
-    return
-  }
-
-  if (req.query.db) {
-    db = req.query.db
-  } else {
-    res.status(500).send('Could not find a Database Name in the request')
-    res.end()
-    return
-  }
 
   try {
     const collections = await mongodbService.listCollections(user, db)
@@ -214,23 +116,8 @@ app.get('/list-collections', async function (req, res) {
 app.get('/get-identity', async function (req, res) {
   // get identity
   // list databases
-  let user
-  let id
-  if (req.query.user) {
-    user = req.query.user
-  } else {
-    res.status(500).send('Could not find a User in the request')
-    res.end()
-    return
-  }
-
-  if (req.query.id) {
-    id = req.query.id
-  } else {
-    res.status(500).send('Could not find an Identity ID in the request')
-    res.end()
-    return
-  }
+  let user = getRequestVariable('user', req, res, 'GET')
+  let id = getRequestVariable('id', req, res, 'GET')
 
   try {
     const results = await identityService.getIdentity(user, id)
@@ -242,7 +129,7 @@ app.get('/get-identity', async function (req, res) {
 })
 
 app.post('/get-identities', async function (req, res) {
-  let user
+  let user = getRequestVariable('user', req, res)
   let query = {}
   let deleted = false
   if (req.body.user) {
@@ -271,33 +158,9 @@ app.post('/get-identities', async function (req, res) {
 })
 
 app.post('/update-identity', async function (req, res) {
-  let documentId
-  let documentToUpdateWith
-  let user
-
-  if (req.body.documentId) {
-    documentId = req.body.documentId
-  } else {
-    res.status(500).send('Could not find a Document in the request')
-    res.end()
-    return
-  }
-
-  if (req.body.documentToUpdateWith) {
-    documentToUpdateWith = req.body.documentToUpdateWith
-  } else {
-    res.status(500).send('Could not find a Document in the request')
-    res.end()
-    return
-  }
-
-  if (req.body.user) {
-    user = req.body.user
-  } else {
-    res.status(500).send('Could not find a User in the request')
-    res.end()
-    return
-  }
+  let documentId = getRequestVariable('documentId', req, res)
+  let documentToUpdateWith = getRequestVariable('documentToUpdateWith', req, res)
+  let user = getRequestVariable('user', req, res)
 
   try {
     await identityService.updateIdentityWithDocument(user, documentId, documentToUpdateWith)
@@ -309,33 +172,9 @@ app.post('/update-identity', async function (req, res) {
 })
 
 app.post('/update-multiple-identities', async function (req, res) {
-  let documentToUpdateWith
-  let user
-  let filter
-
-  if (req.body.documentToUpdateWith) {
-    documentToUpdateWith = req.body.documentToUpdateWith
-  } else {
-    res.status(500).send('Could not find a Document in the request')
-    res.end()
-    return
-  }
-
-  if (req.body.filter) {
-    filter = req.body.filter
-  } else {
-    res.status(500).send('Could not find a Document in the request')
-    res.end()
-    return
-  }
-
-  if (req.body.user) {
-    user = req.body.user
-  } else {
-    res.status(500).send('Could not find a User in the request')
-    res.end()
-    return
-  }
+  let documentToUpdateWith = getRequestVariable('documentToUpdateWith', req, res)
+  let user = getRequestVariable('user', req, res)
+  let filter = getRequestVariable('filter', req, res)
 
   try {
     await identityService.updateMultipleIdentities(user, filter, documentToUpdateWith)
