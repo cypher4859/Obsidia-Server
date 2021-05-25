@@ -10,22 +10,6 @@ class IdentityService {
 
   identitiesCollection = 'identities'
   databaseName = 'case-file'
-  
-  async getIdentity (user, obsId) {
-    // return this.getDataFromDatabase(id)[0]
-    return await mongodbService.getDocument(this.identitiesCollection, this.databaseName,
-      {
-        id: obsId, 
-        _user: user,
-        _deleted: false
-      }
-    )
-  }
-
-  async getIdentities (query, deleted = false, user = "cypher") {
-    const fixedQuery = Object.assign(query, { _deleted: deleted, _user: user })
-    return await mongodbService.getMultipleDocuments(this.identitiesCollection, this.databaseName, fixedQuery)
-  }
 
   getQueries () {
     return `
@@ -79,6 +63,21 @@ class IdentityService {
     `
   }
 
+  async getIdentity (user, obsId) {
+    return await mongodbService.getDocument(this.identitiesCollection, this.databaseName,
+      {
+        id: obsId, 
+        _user: user,
+        _deleted: false
+      }
+    )
+  }
+
+  async getIdentities (query, deleted = false, user = "cypher") {
+    const fixedQuery = Object.assign(query, { _deleted: deleted, _user: user })
+    return await mongodbService.getMultipleDocuments(this.identitiesCollection, this.databaseName, fixedQuery)
+  }
+
   getAllIdentitiesFromDatabase () {
     return Object.values(testData).filter((data) => {
       return data.id && !data._deleted
@@ -91,11 +90,11 @@ class IdentityService {
     })
   }
 
-  getDataFromDatabase (arg) {
-    return Object.values(testData).filter((data) => {
-      return Object.values(data).includes(arg) && !data._deleted
-    })
-  }
+  // getDataFromDatabase (arg) {
+  //   return Object.values(testData).filter((data) => {
+  //     return Object.values(data).includes(arg) && !data._deleted
+  //   })
+  // }
 
   insertModelIntoDatabase (identityModel) {
     const id = uuidv4()
@@ -104,8 +103,12 @@ class IdentityService {
     return testData[identityModel.id]
   }
 
-  createIdentity (identityModel) {
-    return this.insertModelIntoDatabase(identityModel)
+  async createIdentity (user, identityModel) {
+    return await mongodbService.insertNewDocumentForUser(user, this.identitiesCollection, this.databaseName, identityModel)
+  }
+
+  async createNewGroupOfIdentities (user, collection, database, documents) {
+    return await mongodbService.insertNewDocumentGroupForUser(user, this.identitiesCollection, this.databaseName, documents)
   }
 
   async updateIdentityWithDocument (user, id, document) {
