@@ -40,7 +40,6 @@ class MongodbService {
     } catch {
       throw 'Could not create collection'
     }
-    this.client.close()
   }
 
   // TODO: This needs to be generic - no Identity
@@ -52,20 +51,16 @@ class MongodbService {
     } catch {
       throw 'Could not insert document'
     }
-    this.client.close()
   }
 
-  // TODO: This needs to be generic - no Identity
   async insertNewDocumentGroupForUser (user, collectionName, databaseName, documents) {
     try {
       await this.client.connect()
       const db = this.client.db(databaseName)
-      // console.log(identities)
       await db.collection(collectionName).insertMany(documents)
     } catch {
       throw 'Could not insert documents into the database!'
     }
-    this.client.close()
   }
 
   async listDatabases (user) {
@@ -106,12 +101,10 @@ class MongodbService {
     try {
       await this.client.connect()
       const results = await this.client.db(db).collection(collectionName).findOne(query)
-      console.log(results)
       return results
     } catch {
       throw 'Could not find documents meeting criteria in the database!'
     }
-    this.client.close()
   }
 
   async getMultipleDocuments (collectionName, db, query) {
@@ -123,7 +116,6 @@ class MongodbService {
     } catch {
       throw 'Error attempting to find documents!'
     }
-    this.client.close()
   }
 
   async updateDocumentWithNewModel (collectionName, db, user, filter, updateDocument) {
@@ -133,7 +125,6 @@ class MongodbService {
     } catch {
       throw 'Error updating document'
     }
-    this.client.close()
   }
 
   async updateMultipleDocumentsWithNewModel (collectionName, db, user, filter, updateDocument) {
@@ -145,7 +136,6 @@ class MongodbService {
     } catch {
       throw 'Error updating multiple documents'
     }
-    this.client.close()
   }
 
   async dropCollection () {}
