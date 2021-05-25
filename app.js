@@ -39,7 +39,7 @@ app.get('/', async function (req, res) {
   res.end()
 })
 
-app.post('/create-new-collection', async function (req, res) {
+app.post('/admin/create-new-collection', async function (req, res) {
   let collection = getRequestVariable('collection', req, res)
   let user = getRequestVariable('user', req, res)
   let database = getRequestVariable('database', req, res)
@@ -53,37 +53,7 @@ app.post('/create-new-collection', async function (req, res) {
   res.end()
 })
 
-app.post('/insert-new-identity', async function (req, res) {
-  let collection = getRequestVariable('collection', req, res)
-  let user = getRequestVariable('user', req, res)
-  let database = getRequestVariable('database', req, res)
-  let document = getRequestVariable('document', req, res)
-
-  try {
-    await identityService.createIdentity(document)
-    res.status(200).send('Created the new Identity')
-  } catch {
-    res.status(500).send('ERROR something went wrong')
-  }
-  res.end()
-})
-
-app.post('/insert-new-identity-group', async function (req, res) {
-  let database = getRequestVariable('database', req, res)
-  let collection = getRequestVariable('collection', req, res)
-  let documents = getRequestVariable('documents', req, res)
-  let user = getRequestVariable('user', req, res)
-
-  try {
-    await mongodbService.insertNewDocumentGroupForUser(user, collection, database, documents)
-    res.status(200).send('Created the new group of identities')
-  } catch {
-    res.status(500).send('ERROR something went wrong')
-  }
-  res.end()
-})
-
-app.get('/list-databases', async function (req,res) {
+app.get('/admin/list-databases', async function (req,res) {
   // list databases
   let user = getRequestVariable('user', req, res, 'GET')
 
@@ -97,7 +67,7 @@ app.get('/list-databases', async function (req,res) {
 })
 
 /// TODO: List out the collections correctly, this is weird (?)
-app.get('/list-collections', async function (req, res) {
+app.get('/admin/list-collections', async function (req, res) {
   // list collections
   let user = getRequestVariable('user', req, res, 'GET')
   let db = getRequestVariable('db', req, res, 'GET')
@@ -105,7 +75,6 @@ app.get('/list-collections', async function (req, res) {
 
   try {
     const collections = await mongodbService.listCollections(user, db)
-    console.log('Collections at the top of the heirarchy: ', collections)
     res.status(200).send({ collections: collections })
   } catch {
     res.status(500).send('ERROR! Could not list collections')
@@ -113,32 +82,52 @@ app.get('/list-collections', async function (req, res) {
   res.end()
 })
 
-app.get('/get-identity', async function (req, res) {
+app.post('/identity/create-new-single', async function (req, res) {
+  let user = getRequestVariable('user', req, res)
+  let document = getRequestVariable('document', req, res)
+
+  try {
+    await identityService.createIdentity(user, document)
+    res.status(200).send('Created the new Identity')
+  } catch {
+    res.status(500).send('ERROR something went wrong')
+  }
+  res.end()
+})
+
+app.post('/identity/create-new-multiple', async function (req, res) {
+  let database = getRequestVariable('database', req, res)
+  let collection = getRequestVariable('collection', req, res)
+  let documents = getRequestVariable('documents', req, res)
+  let user = getRequestVariable('user', req, res)
+
+  try {
+    await identityService.createNewGroupOfIdentities(user, collection, database, documents)
+    res.status(200).send('Created the new group of identities')
+  } catch {
+    res.status(500).send('ERROR something went wrong')
+  }
+  res.end()
+})
+
+app.post('/identity/get-identity-details', async function (req, res) {
   // get identity
-  // list databases
-  let user = getRequestVariable('user', req, res, 'GET')
-  let id = getRequestVariable('id', req, res, 'GET')
+  let user = getRequestVariable('user', req, res)
+  let id = getRequestVariable('id', req, res)
 
   try {
     const results = await identityService.getIdentity(user, id)
     res.status(200).send(results)
   } catch {
-    res.status(500).send('ERROR! Could not list databases')
+    res.status(500).send('ERROR! Could not get Identity')
   }
   res.end()
 })
 
-app.post('/get-identities', async function (req, res) {
+app.post('/identity/get-identities', async function (req, res) {
   let user = getRequestVariable('user', req, res)
   let query = {}
   let deleted = false
-  if (req.body.user) {
-    user = req.body.user
-  } else {
-    res.status(500).send('Could not find a User in the request')
-    res.end()
-    return
-  }
 
   if (req.body._deleted !== null) {
     deleted = req.body._deleted
@@ -157,13 +146,13 @@ app.post('/get-identities', async function (req, res) {
   res.end()
 })
 
-app.post('/update-identity', async function (req, res) {
-  let documentId = getRequestVariable('documentId', req, res)
+app.post('/identity/update-identity', async function (req, res) {
+  let obsId = getRequestVariable('obsId', req, res)
   let documentToUpdateWith = getRequestVariable('documentToUpdateWith', req, res)
   let user = getRequestVariable('user', req, res)
 
   try {
-    await identityService.updateIdentityWithDocument(user, documentId, documentToUpdateWith)
+    await identityService.updateIdentityWithDocument(user, obsId, documentToUpdateWith)
     res.status(200).send('Updated document')
   } catch {
     res.status(500).send('ERROR something went wrong')
@@ -171,14 +160,14 @@ app.post('/update-identity', async function (req, res) {
   res.end()
 })
 
-app.post('/update-multiple-identities', async function (req, res) {
+app.post('/identity/update-multiple-identities', async function (req, res) {
   let documentToUpdateWith = getRequestVariable('documentToUpdateWith', req, res)
   let user = getRequestVariable('user', req, res)
   let filter = getRequestVariable('filter', req, res)
 
   try {
     await identityService.updateMultipleIdentities(user, filter, documentToUpdateWith)
-    res.status(200).send('Updated document')
+    res.status(200).send('Updated all documents')
   } catch {
     res.status(500).send('ERROR something went wrong')
   }
